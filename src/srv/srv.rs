@@ -227,7 +227,7 @@ impl Srv {
             }
 
             if !some_received && !some_sended {
-                std::thread::sleep(Duration::from_micros(100));
+                std::thread::sleep(Duration::from_millis(2));
             }
         }
 

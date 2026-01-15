@@ -273,13 +273,13 @@ fn start_client(
 
     let tun_config = TunIfaceConfig {
         ipv4_addr: vpn_ip,
-        mtu: 1500,
+        mtu: 1472,
         mask: 32,
         destination_ipv4: Some(vpn_gate),
         device_name: String::from("loki0"),
         enable_pi_ipv4_filter: false,
-        recv_queue_cap: 1024,
-        send_queue_cap: 1024,
+        recv_queue_cap: 128,
+        send_queue_cap: 128,
     };
 
     let tun = Arc::new(TunIface::new_iface(tun_config)?);
@@ -341,9 +341,9 @@ fn start_client(
     let udp_client_config = CliConfig {
         ipv4_host: server_addr,
         ipv4_port: 51820,
-        recv_queue_cap: 1024,
-        send_queue_cap: 1024,
-        mtu: 1500,
+        recv_queue_cap: 128,
+        send_queue_cap: 128,
+        mtu: 1472,
     };
 
     let udp_cli = Arc::new(Cli::new(udp_client_config)?);
@@ -388,7 +388,7 @@ fn start_client(
             udp_cli.send_queue.len()
         );
         std::io::Write::flush(&mut std::io::stderr()).unwrap();
-        std::thread::sleep(Duration::from_secs(1));
+        std::thread::sleep(Duration::from_millis(500));
     }
 
     if let Some(tun_moved) = Arc::try_unwrap(tun).ok() {
@@ -439,20 +439,20 @@ fn start_server(target_iface: String) -> Result<(), LokiError> {
     let tun_config = TunIfaceConfig {
         ipv4_addr: [192, 168, 0, 1],
         enable_pi_ipv4_filter: false,
-        mtu: 1500,
+        mtu: 1472,
         mask: 16,
         destination_ipv4: None,
         device_name: String::from("loki0"),
-        recv_queue_cap: 1024,
-        send_queue_cap: 1024,
+        recv_queue_cap: 128,
+        send_queue_cap: 128,
     };
 
     let srv_config = SrvConfig {
         ipv4_listen_host: [0, 0, 0, 0],
         ipv4_listen_port: 51820,
-        recv_queue_cap: 1024,
-        send_queue_cap: 1024,
-        mtu: 1500,
+        recv_queue_cap: 128,
+        send_queue_cap: 128,
+        mtu: 1472,
     };
 
     let tun = Arc::new(TunIface::new_iface(tun_config)?);
@@ -605,7 +605,7 @@ fn cli_tun_to_udp_pipe(cli: Weak<Cli>, tun: Weak<TunIface>) -> Result<(), LokiEr
 
             let Some(tun_received_item) = tun_received_item else {
                 println!("WARN tun -> server: no packet! maybe UB? but not critical");
-                std::thread::sleep(Duration::from_micros(100));
+                std::thread::sleep(Duration::from_millis(2));
                 continue;
             };
 
@@ -629,7 +629,7 @@ fn cli_tun_to_udp_pipe(cli: Weak<Cli>, tun: Weak<TunIface>) -> Result<(), LokiEr
                 }
             }
         } else {
-            std::thread::sleep(Duration::from_micros(100));
+            std::thread::sleep(Duration::from_millis(2));
         }
     }
     Ok(())
@@ -669,7 +669,7 @@ fn tun_to_udp_pipe(
 
             let Some(tun_received_item) = tun_received_item else {
                 println!("WARN tun -> server: no packet! maybe UB? but not critical");
-                std::thread::sleep(Duration::from_micros(100));
+                std::thread::sleep(Duration::from_millis(2));
                 continue;
             };
 
@@ -716,7 +716,7 @@ fn tun_to_udp_pipe(
                 continue;
             }
         } else {
-            std::thread::sleep(Duration::from_micros(100));
+            std::thread::sleep(Duration::from_millis(2));
         }
     }
     Ok(())
@@ -752,7 +752,7 @@ fn cli_udp_to_tun_pipe(cli: Weak<Cli>, tun: Weak<TunIface>) -> Result<(), LokiEr
             }
             let Some(udp_received_item) = udp_received_item else {
                 println!("WARN cli -> tun: no packet! maybe UB? but not critical");
-                std::thread::sleep(Duration::from_micros(100));
+                std::thread::sleep(Duration::from_millis(2));
                 continue;
             };
 
@@ -785,7 +785,7 @@ fn cli_udp_to_tun_pipe(cli: Weak<Cli>, tun: Weak<TunIface>) -> Result<(), LokiEr
                 }
             }
         } else {
-            std::thread::sleep(Duration::from_micros(100));
+            std::thread::sleep(Duration::from_millis(2));
         }
     }
     Ok(())
@@ -824,7 +824,7 @@ fn udp_to_tun_pipe(
             }
             let Some(udp_received_item) = udp_received_item else {
                 println!("WARN server -> tun: no packet! maybe UB? but not critical");
-                std::thread::sleep(Duration::from_micros(100));
+                std::thread::sleep(Duration::from_millis(2));
                 continue;
             };
 
@@ -880,7 +880,7 @@ fn udp_to_tun_pipe(
                 }
             }
         } else {
-            std::thread::sleep(Duration::from_micros(100));
+            std::thread::sleep(Duration::from_millis(2));
         }
     }
     Ok(())

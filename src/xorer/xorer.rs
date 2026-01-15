@@ -88,6 +88,18 @@ impl Xorer {
     //xor - like encript
     #[inline(always)]
     pub fn xor(val: &mut Vec<u8>) -> Option<LokiError> {
+        let err = Self::xor_operation(val);
+        if err.is_some() {
+            return err;
+        }
+        val.reverse();
+
+        return None;
+    }
+
+    //xor - like encript
+    #[inline(always)]
+    fn xor_operation(val: &mut Vec<u8>) -> Option<LokiError> {
         if val.len() > Self::MAX_UNIT_LEN {
             return Some(LokiError::XORLenOverflow);
         }
@@ -104,7 +116,8 @@ impl Xorer {
     //un_xor like decript and check is ipv4
     #[inline(always)]
     pub fn un_xor_verify(val: &mut Vec<u8>) -> Option<LokiError> {
-        let err = Self::xor(val);
+        val.reverse();
+        let err = Self::xor_operation(val);
         if err.is_some() {
             return err;
         }
